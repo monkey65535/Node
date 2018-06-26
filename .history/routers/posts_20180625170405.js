@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 
-const { checkLogin } = require('../middlewares/check')
+const {checkLogin} = require('../middlewares/check')
 
 /**
  * GET /Posts所有用户或者特定用户的文章页面
