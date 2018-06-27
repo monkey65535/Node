@@ -19,7 +19,7 @@ app.use(express.static(path.join(__dirname, 'public')))
 // session 中间件
 app.use(
   session({
-    // 设置cookie中保存 session id 的字段名称
+    // 设置cookie中保存 session id 的字段名称da
     name: config.session.key,
     // 通过设置 secret 来计算 hash 值并放在 cookie 中，使产生的 signedCookie 防篡改
     secret: config.session.secret,

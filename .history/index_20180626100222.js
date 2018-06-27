@@ -17,27 +17,25 @@ app.set('view engine', 'ejs')
 app.use(express.static(path.join(__dirname, 'public')))
 
 // session 中间件
-app.use(
-  session({
-    // 设置cookie中保存 session id 的字段名称
-    name: config.session.key,
-    // 通过设置 secret 来计算 hash 值并放在 cookie 中，使产生的 signedCookie 防篡改
-    secret: config.session.secret,
-    // 强制更新 session
-    resave: true,
-    // 设置为 false，强制创建一个 session，即使用户未登录
-    saveUninitialized: false,
-    // 过期时间，过期后 cookie 中的 session id 自动删除
-    cookie: {
-      maxAge: config.session.maxAge
-    },
-    // 将 session 存储到 mongodb
-    store: new MongoStore({
-      // mongodb 地址
-      url: config.mongodb
-    })
+app.use(session({
+  // 设置cookie中保存 session id 的字段名称
+  name: config.session.key,
+  // 通过设置 secret 来计算 hash 值并放在 cookie 中，使产生的 signedCookie 防篡改
+  secret: config.session.secret,
+  // 强制更新 session
+  resave: true,
+  // 设置为 false，强制创建一个 session，即使用户未登录
+  saveUninitialized: false,
+  // 过期时间，过期后 cookie 中的 session id 自动删除
+  cookie: {
+    maxAge: config.session.maxAge
+  },
+  // 将 session 存储到 mongodb
+  store: new MongoStore({
+    // mongodb 地址
+    url: config.mongodb
   })
-)
+}))
 
 // flash 中间件，用来显示通知
 app.use(flash())
