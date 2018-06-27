@@ -60,7 +60,6 @@ User
     console.error(e)
     console.error(e.stack)
   })
-
 // 监听端口
 app.listen(config.port, () => {
   console.log(`${pkg.name} listening on port ${config.port}`)

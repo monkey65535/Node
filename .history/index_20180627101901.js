@@ -46,7 +46,6 @@ app.use(flash())
 
 // 路由
 routes(app)
-
 const User = mongolass.model('User', {
   name: { type: 'string' },
   age: { type: 'number' }
@@ -60,7 +59,6 @@ User
     console.error(e)
     console.error(e.stack)
   })
-
 // 监听端口
 app.listen(config.port, () => {
   console.log(`${pkg.name} listening on port ${config.port}`)

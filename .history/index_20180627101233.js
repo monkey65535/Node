@@ -5,7 +5,6 @@ const MongoStore = require('connect-mongo')(session)
 const flash = require('connect-flash')
 const config = require('config-lite')(__dirname)
 const Mongolass = require('mongolass')
-const mongolass = new Mongolass()
 const routes = require('./routers')
 const pkg = require('./package')
 
@@ -46,20 +45,6 @@ app.use(flash())
 
 // 路由
 routes(app)
-
-const User = mongolass.model('User', {
-  name: { type: 'string' },
-  age: { type: 'number' }
-})
-
-User
-  .insertOne({ name: 'nswbmw', age: 'wrong age' })
-  .exec()
-  .then(console.log)
-  .catch(function (e) {
-    console.error(e)
-    console.error(e.stack)
-  })
 
 // 监听端口
 app.listen(config.port, () => {
