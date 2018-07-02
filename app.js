@@ -21,6 +21,8 @@ app.set('views', './views')
 app.set('view engine', 'html')
 //在开发过程中，需要取消模板缓存
 swig.setDefaults({cache: false})
+// 定义bpdyParsaer中间件设置
+app.use(bodyParser.urlencoded({extended: true}))
 
 // 根据不同的功能划分不同的路由
 app.use('/admin', require(path.join(__dirname, '/routers/admin')))
