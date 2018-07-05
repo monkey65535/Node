@@ -2,6 +2,7 @@ const express = require('express')
 const router = express.Router()
 
 const User = require('../models/users')
+const Category = require('../models/Category')
 
 // 公用权限判断
 router.use((req, res, next) => {
@@ -50,7 +51,7 @@ router.get('/user', (req, res) => {
     res.render('admin/user_index', {
       userInfo: req.userInfo,
       users: users,
-      count:countNum,
+      count: countNum,
       page,
       limit,
       pages,
@@ -58,6 +59,53 @@ router.get('/user', (req, res) => {
     })
   })
 
+})
+
+// 文章分类  分类管理
+router.get('/category', (req, res) => {
+  res.render('admin/category_index', {
+    userInfo: req.userInfo
+  })
+})
+
+// 文章分类 分类添加
+router.get('/category/add', (req, res) => {
+  res.render('admin/category_add', {
+    userInfo: req.userInfo
+  })
+})
+// 添加分类api
+router.post('/category/add', (req, res) => {
+  const {name} = req.body
+  if (name === '' && name.trim() === '') {
+    res.render('admin/error', {
+      userInfo: req.userInfo,
+      message: '分类名不能为空或空格'
+    })
+    return
+  }
+  // 查询数据库种是否有相同字段
+  Category.findOne({
+    name
+  }).then(rs => {
+    if (rs) {
+      res.render('admin/error', {
+        userInfo: req.userInfo,
+        message: '分类名已存在'
+      })
+      return Promise.reject()
+    } else {
+      return new Category({
+        name
+      }).save()
+    }
+  }).then(newCategory => {
+    res.render('admin/success',{
+      userInfo:req.userInfo,
+      message:'保存成功',
+      url:'/admin/category'
+    })
+  })
 })
 
 module.exports = router
