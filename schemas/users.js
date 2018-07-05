@@ -11,5 +11,10 @@ module.exports = new Schema({
   //用户名
   username: String,
   //密码
-  password: String
+  password: String,
+  //用户权限
+  isAdmin: {
+    type: Boolean,
+    default: false
+  }
 })

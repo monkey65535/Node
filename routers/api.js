@@ -117,4 +117,12 @@ router.post('/user/login', (req, res, next) => {
   })
 })
 
+// 退出登录
+router.get('/user/logout', (req, res) => {
+  // 对浏览器设置一个cookie保存登录状态
+  req.cookies.set('userInfo', null)
+  responseData.message = '退出成功'
+  res.json(responseData)
+})
+
 module.exports = router

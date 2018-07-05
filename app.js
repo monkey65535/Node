@@ -4,9 +4,9 @@ const swig = require('swig')
 const mongoose = require('mongoose')
 const bodyParser = require('body-parser')
 const Cookies = require('cookies')
-const CookieParser = require('cookie-parser')
 // 初始化express
 const app = express()
+const User = require('./models/users')
 
 // 设置静态文件托管
 // 当用户访问的url以/public开始，那么直接返回对应__dirname + '/public'下的文件
@@ -24,11 +24,26 @@ app.set('view engine', 'html')
 swig.setDefaults({cache: false})
 // 定义bpdyParsaer中间件设置
 app.use(bodyParser.urlencoded({extended: true}))
-app.use(CookieParser())
 
 app.use((req, res, next) => {
-  req.cookies = new Cookies()
-  next()
+  req.cookies = new Cookies(req, res)
+  //判断全局的登录状态 解析登录用户的登录信息
+  req.userInfo = {}
+  if (req.cookies.get('userInfo')) {
+    try {
+      req.userInfo = JSON.parse(req.cookies.get('userInfo'))
+      //  判断用户权限，是否时管理员
+      User.findById(req.userInfo._id).then((userInfo) => {
+        req.userInfo.isAdmin = !!userInfo.isAdmin
+        next()
+      })
+    } catch (e) {
+      next()
+    }
+  } else {
+    next()
+  }
+
 })
 
 // 根据不同的功能划分不同的路由
