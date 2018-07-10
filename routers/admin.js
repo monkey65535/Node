@@ -3,6 +3,7 @@ const router = express.Router()
 
 const User = require('../models/users')
 const Category = require('../models/Category')
+const Content = require('../models/Content')
 
 // 公用权限判断
 router.use((req, res, next) => {
@@ -77,7 +78,12 @@ router.get('/category', (req, res) => {
 
     skip = (page - 1) * limit > 0 ? (page - 1) * limit : 0
     countNum = count
-    return Category.find().limit(limit).skip(skip)
+    /**
+     * 分类排序
+     * 1为升序
+     * -1为降序
+     **/
+    return Category.find().sort({_id: 1}).limit(limit).skip(skip)
   }).then(categories => {
     res.render('admin/category_index', {
       userInfo: req.userInfo,
@@ -88,7 +94,6 @@ router.get('/category', (req, res) => {
       pages,
       skip
     })
-
   })
 })
 
@@ -214,4 +219,148 @@ router.get('/category/delete', (req, res) => {
   })
 })
 
+// 博客内容管理
+router.get('/content', (req, res) => {
+
+  let page = req.query.page || 1
+  let limit = 30
+  let pages = 0
+  let skip = 0
+  let countNum = 0
+
+  Category.count().then(count => {
+    // 计算总页数
+    pages = Math.ceil(count / limit)
+    // 取值不能超过pages
+    page = Math.min(page, pages)
+
+    skip = (page - 1) * limit > 0 ? (page - 1) * limit : 0
+    countNum = count
+    /**
+     * 分类排序
+     * 1为升序
+     * -1为降序
+     **/
+    return Content.find().sort({_id: 1}).limit(limit).skip(skip).populate('category')
+  }).then(contents => {
+    res.render('admin/content_index', {
+      userInfo: req.userInfo,
+      contents: contents,
+      count: countNum,
+      page,
+      limit,
+      pages,
+      skip
+    })
+  })
+})
+
+// 博客内容添加
+router.get('/content/add', (req, res) => {
+  // 读取分类信息
+  Category.find().sort({_id: -1}).then(categories => {
+    // 渲染页面
+    res.render('admin/content_add', {
+      userInfo: req.userInfo,
+      categories
+    })
+  })
+})
+// 博客内容保存
+router.post('/content/add', (req, res) => {
+  const {category, title, description, content} = req.body
+  // 验证标题和栏目不能为空
+  if (!Category) {
+    res.render('admin/error', {
+      userInfo: req.userInfo,
+      message: '分类不能为空'
+    })
+    return
+  }
+  if (!title || title.trim() === '') {
+    res.render('admin/error', {
+      userInfo: req.userInfo,
+      message: '标题不能为空'
+    })
+    return
+  }
+  new Content({
+    category, title, description, content
+  }).save().then(re => {
+    res.render('admin/error', {
+      userInfo: req.userInfo,
+      message: '内容保存成功'
+    })
+  })
+})
+// 博客内容修改
+router.get('/content/edit', (req, res) => {
+  const _id = req.query.id || ''
+  let cate = null
+  Category.find().sort({_id: -1}).then(categories => {
+    // 渲染页面
+    cate = categories
+    return Content.findOne({_id})
+  }).then(content => {
+    if (!content) {
+      res.render('admin/error', {
+        userInfo: req.userInfo,
+        message: '指定内容不存在'
+      })
+    } else {
+      res.render('admin/content_edit', {
+        userInfo: req.userInfo,
+        content,
+        categories: cate
+      })
+    }
+  })
+})
+
+// 内容保存
+router.post('/content/edit', (req, res) => {
+  const {category, title, description, content} = req.body
+  const _id = req.query.id || ''
+  // 验证标题和栏目不能为空
+  if (!Category) {
+    res.render('admin/error', {
+      userInfo: req.userInfo,
+      message: '分类不能为空'
+    })
+    return
+  }
+  if (!title || title.trim() === '') {
+    res.render('admin/error', {
+      userInfo: req.userInfo,
+      message: '标题不能为空'
+    })
+    return
+  }
+  Content.update({_id}, {
+    category,
+    title,
+    description,
+    content,
+    user: req.userInfo._id.toString()
+  }).then(re => {
+    res.render('admin/error', {
+      userInfo: req.userInfo,
+      message: '内容保存成功'
+    })
+  })
+})
+// 博客内容删除
+router.get('/content/delete', (req, res) => {
+  const _id = req.query.id || ''
+  Content.remove({
+    _id
+  }).then(rs => {
+    res.render('admin/error', {
+      userInfo: req.userInfo,
+      message: '内容删除成功',
+      url: 'admin/content'
+    })
+  })
+})
 module.exports = router
+
